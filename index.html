@@ -1,34 +1,641 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Art Site</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KOSHDI — 2D Artist</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=Syne:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    .font-heading { font-family: 'Syne', sans-serif; }
+    .font-body { font-family: 'Playfair Display', serif; }
 
-<header>
-    <h1>Koshdi Art</h1>
-    <nav>
-        <a href="index.html">Главная</a>
-        <a href="pages/gallery.html">Галерея</a>
-        <a href="pages/commissions.html">Коммишки</a>
-        <a href="pages/projects.html">Проекты</a>
-    </nav>
-</header>
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes shimmer {
+      0%, 100% { text-shadow: 0 0 0 transparent; }
+      50% { text-shadow: 0 0 8px rgba(255,255,255,0.3); }
+    }
+    .anim-fade { animation: fadeUp 0.7s ease both; }
+    .anim-slide { animation: slideIn 0.5s ease both; }
+    .anim-scale { animation: scaleIn 0.6s ease both; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+    .delay-6 { animation-delay: 0.6s; }
+    .star-shimmer { animation: shimmer 2s ease-in-out infinite; }
 
-<main>
-    <section class="hero">
-        <h2>Добро пожаловать</h2>
-        <p>2D artist • character design • commissions open</p>
-    </section>
-</main>
+    .gallery-item {
+      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease;
+    }
+    .gallery-item:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
 
-<footer>
-    <p>© 2026 Koshdi</p>
-</footer>
+    .nav-link {
+      position: relative;
+      transition: color 0.3s;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: currentColor;
+      transition: width 0.3s ease;
+    }
+    .nav-link:hover::after,
+    .nav-link.active::after {
+      width: 100%;
+    }
 
-<script src="script.js"></script>
-</body>
+    .section-hidden { display: none; }
+    .section-visible { display: block; }
+
+    .commission-tier {
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+    .commission-tier:hover {
+      transform: translateY(-4px);
+      border-color: #fff !important;
+    }
+
+    .star-icon { transition: transform 0.3s; display: inline-block; }
+    .star-icon:hover { transform: rotate(15deg) scale(1.2); }
+
+    .testimonial-card {
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+    .testimonial-card:hover {
+      transform: translateY(-2px);
+      border-color: #666;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+    .accordion-header {
+      cursor: pointer;
+      user-select: none;
+    }
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .accordion-open .accordion-content {
+      max-height: 500px;
+    }
+  </style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full font-body">
+  <div id="app" class="w-full h-full bg-black text-white overflow-auto"><!-- NAV -->
+   <nav class="fixed top-0 left-0 w-full z-50 bg-black/90 backdrop-blur-sm border-b border-neutral-900">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+     <div class="font-heading font-bold text-lg tracking-wider cursor-pointer" id="nav-logo" onclick="navigate('home')">
+      ✦ KOSHDI ✦
+     </div>
+     <div class="flex gap-6 text-xs font-heading tracking-widest uppercase">
+      <a class="nav-link active cursor-pointer" data-nav="home" onclick="navigate('home')">Home</a> <a class="nav-link cursor-pointer" data-nav="gallery" onclick="navigate('gallery')">Gallery</a> <a class="nav-link cursor-pointer" data-nav="commissions" onclick="navigate('commissions')">Commissions</a> <a class="nav-link cursor-pointer" data-nav="projects" onclick="navigate('projects')">Projects</a> <a class="nav-link cursor-pointer" data-nav="about" onclick="navigate('about')">About</a>
+     </div>
+    </div>
+   </nav><!-- HOME -->
+   <section id="page-home" class="section-visible pt-20">
+    <div class="max-w-6xl mx-auto px-6 py-20">
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center min-h-[70%]">
+      <div>
+       <p class="font-heading text-xs tracking-[0.4em] uppercase text-neutral-500 anim-slide">2D Digital Artist</p>
+       <h1 id="hero-name" class="font-heading text-6xl md:text-7xl font-extrabold mt-4 leading-none anim-fade delay-1">KOSHDI</h1>
+       <p id="hero-tagline" class="text-neutral-400 text-lg mt-6 leading-relaxed anim-fade delay-2">Turning celebrities into ink-stained dreams. Portraits that blur the line between fame and fantasy.</p>
+       <p class="text-neutral-500 text-sm mt-4 anim-fade delay-2">she / her | 🇺🇦 ukr / eng</p>
+       <div class="flex gap-4 mt-10 anim-fade delay-3">
+        <button onclick="navigate('gallery')" class="font-heading text-xs tracking-widest uppercase bg-white text-black px-8 py-3 hover:bg-neutral-200 transition-colors">View Works</button> <button onclick="navigate('commissions')" class="font-heading text-xs tracking-widest uppercase border border-neutral-600 px-8 py-3 hover:border-white transition-colors">Commissions</button>
+       </div>
+      </div>
+      <div class="anim-scale delay-2">
+       <div class="aspect-[3/4] bg-neutral-950 border border-neutral-800 relative overflow-hidden group">
+        <svg viewbox="0 0 300 400" class="w-full h-full">
+         <defs>
+          <pattern id="dots" x="0" y="0" width="8" height="8" patternunits="userSpaceOnUse">
+           <circle cx="1" cy="1" r="0.5" fill="#333" />
+          </pattern>
+         </defs> <rect width="300" height="400" fill="url(#dots)" /> <ellipse cx="150" cy="160" rx="55" ry="70" fill="none" stroke="#fff" stroke-width="0.8" /> <path d="M120 130 Q150 80 180 130" fill="none" stroke="#fff" stroke-width="0.5" /> <circle cx="135" cy="150" r="4" fill="#fff" /> <circle cx="165" cy="150" r="4" fill="#fff" /> <path d="M140 175 Q150 182 160 175" fill="none" stroke="#fff" stroke-width="0.7" /> <path d="M95 160 Q60 200 80 280 L120 350" fill="none" stroke="#fff" stroke-width="0.5" /> <path d="M205 160 Q240 200 220 280 L180 350" fill="none" stroke="#fff" stroke-width="0.5" /> <line x1="150" y1="230" x2="150" y2="320" stroke="#fff" stroke-width="0.5" /> <text x="150" y="380" text-anchor="middle" fill="#555" font-size="8" font-family="Syne">
+          ✦ FEATURED PORTRAIT ✦
+         </text> <text x="40" y="50" fill="#666" font-size="14">
+          ✦
+         </text> <text x="250" y="80" fill="#444" font-size="10">
+          ✦
+         </text> <text x="30" y="300" fill="#555" font-size="12">
+          ✦
+         </text> <text x="260" y="330" fill="#444" font-size="8">
+          ✦
+         </text>
+        </svg>
+        <div class="absolute bottom-4 left-4 right-4 text-xs text-neutral-600 font-heading tracking-widest">
+         CELEBRITY PORTRAIT SERIES — 2024
+        </div>
+       </div>
+      </div>
+     </div>
+     <div class="mt-20 border-t border-neutral-900 pt-12">
+      <p class="font-heading text-xs tracking-[0.3em] uppercase text-neutral-600 mb-8">Recent Celebrity Studies</p>
+      <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+       <div class="aspect-square bg-neutral-950 border border-neutral-900 flex items-center justify-center text-2xl anim-fade delay-1 hover:border-neutral-600 transition-colors cursor-pointer star-shimmer">
+        ✦
+       </div>
+       <div class="aspect-square bg-neutral-950 border border-neutral-900 flex items-center justify-center text-neutral-700 text-xs font-heading tracking-widest anim-fade delay-2 hover:border-neutral-600 transition-colors cursor-pointer">
+        IDOL
+       </div>
+       <div class="aspect-square bg-neutral-950 border border-neutral-900 flex items-center justify-center text-2xl anim-fade delay-3 hover:border-neutral-600 transition-colors cursor-pointer star-shimmer">
+        ✦
+       </div>
+       <div class="aspect-square bg-neutral-950 border border-neutral-900 flex items-center justify-center text-neutral-700 text-xs font-heading tracking-widest anim-fade delay-4 hover:border-neutral-600 transition-colors cursor-pointer">
+        MUSE
+       </div>
+       <div class="aspect-square bg-neutral-950 border border-neutral-900 flex items-center justify-center text-2xl anim-fade delay-5 hover:border-neutral-600 transition-colors cursor-pointer star-shimmer">
+        ✦
+       </div>
+       <div class="aspect-square bg-neutral-950 border border-neutral-900 flex items-center justify-center text-neutral-700 text-xs font-heading tracking-widest anim-fade delay-6 hover:border-neutral-600 transition-colors cursor-pointer">
+        ICON
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- GALLERY -->
+   <section id="page-gallery" class="section-hidden pt-20">
+    <div class="max-w-6xl mx-auto px-6 py-16">
+     <h2 class="font-heading text-4xl font-bold anim-fade">Gallery</h2>
+     <p class="text-neutral-500 mt-2 anim-fade delay-1">Selected works from the Celebrity Portrait Series and beyond.</p>
+     <div class="flex gap-4 mt-8 mb-10 font-heading text-xs tracking-widest uppercase anim-fade delay-2 flex-wrap">
+      <button class="gallery-filter px-4 py-2 border border-white text-white" data-filter="all" onclick="filterGallery('all')">All</button> <button class="gallery-filter px-4 py-2 border border-neutral-800 text-neutral-500 hover:border-neutral-500 transition-colors" data-filter="portrait" onclick="filterGallery('portrait')">Portraits</button> <button class="gallery-filter px-4 py-2 border border-neutral-800 text-neutral-500 hover:border-neutral-500 transition-colors" data-filter="editorial" onclick="filterGallery('editorial')">Editorial</button> <button class="gallery-filter px-4 py-2 border border-neutral-800 text-neutral-500 hover:border-neutral-500 transition-colors" data-filter="concept" onclick="filterGallery('concept')">Concept</button>
+     </div>
+     <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+     </div>
+    </div>
+   </section><!-- COMMISSIONS -->
+   <section id="page-commissions" class="section-hidden pt-20">
+    <div class="max-w-6xl mx-auto px-6 py-16">
+     <h2 class="font-heading text-4xl font-bold anim-fade">Commissions</h2>
+     <p id="commission-status" class="text-neutral-400 mt-2 anim-fade delay-1">Status: <span class="text-white font-heading font-semibold">OPEN</span> — Limited slots available</p><!-- Testimonials -->
+     <div class="mt-12 mb-16 anim-fade delay-2">
+      <h3 class="font-heading text-lg font-semibold mb-6">Client Testimonials</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+       <div class="testimonial-card border border-neutral-800 p-6 hover:border-neutral-600">
+        <div class="flex gap-1 mb-3"><span class="text-neutral-400">✦</span><span class="text-neutral-400">✦</span><span class="text-neutral-400">✦</span><span class="text-neutral-400">✦</span><span class="text-neutral-400">✦</span>
+        </div>
+        <p class="text-neutral-300 text-sm leading-relaxed italic">"Koshdi captured exactly what I envisioned — the energy, the presence. Unbelievably talented."</p>
+        <p class="text-neutral-600 text-xs font-heading tracking-widest mt-4">— Alex M., Actor</p>
+       </div>
+       <div class="testimonial-card border border-neutral-800 p-6 hover:border-neutral-600">
+        <div class="flex gap-1 mb-3"><span class="text-neutral-400">✦</span><span class="text-neutral-400">✦</span><span class="text-neutral-400">✦</span><span class="text-neutral-400">✦</span><span class="text-neutral-400">✦</span>
+        </div>
+        <p class="text-neutral-300 text-sm leading-relaxed italic">"Fast turnaround, incredible detail, and responsive to feedback. Highly recommend for any artist."</p>
+        <p class="text-neutral-600 text-xs font-heading tracking-widest mt-4">— Jordan T., Musician</p>
+       </div>
+       <div class="testimonial-card border border-neutral-800 p-6 hover:border-neutral-600">
+        <div class="flex gap-1 mb-3"><span class="text-neutral-400">✦</span><span class="text-neutral-400">✦</span><span class="text-neutral-400">✦</span><span class="text-neutral-400">✦</span><span class="text-neutral-400">✦</span>
+        </div>
+        <p class="text-neutral-300 text-sm leading-relaxed italic">"The level of professionalism here is unmatched. Worth every penny. Can't wait to commission again."</p>
+        <p class="text-neutral-600 text-xs font-heading tracking-widest mt-4">— Casey R., Producer</p>
+       </div>
+       <div class="testimonial-card border border-neutral-800 p-6 hover:border-neutral-600">
+        <div class="flex gap-1 mb-3"><span class="text-neutral-400">✦</span><span class="text-neutral-400">✦</span><span class="text-neutral-400">✦</span><span class="text-neutral-400">✦</span><span class="text-neutral-400">✦</span>
+        </div>
+        <p class="text-neutral-300 text-sm leading-relaxed italic">"Absolutely exceeded my expectations. The portrait is stunning — every detail is perfect."</p>
+        <p class="text-neutral-600 text-xs font-heading tracking-widest mt-4">— Morgan L., Content Creator</p>
+       </div>
+      </div>
+     </div><!-- Commission Tiers -->
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+      <div class="commission-tier border border-neutral-800 p-8 anim-fade delay-1">
+       <div class="text-neutral-600 font-heading text-xs tracking-widest uppercase">
+        Sketch
+       </div>
+       <div class="font-heading text-3xl font-bold mt-2">
+        $50
+       </div>
+       <div class="text-neutral-600 text-xs mt-1 font-heading">
+        Black &amp; white linework
+       </div>
+       <ul class="mt-6 space-y-3 text-sm text-neutral-400">
+        <li class="flex items-center gap-2"><span>✦</span> Single character</li>
+        <li class="flex items-center gap-2"><span>✦</span> Clean lineart</li>
+        <li class="flex items-center gap-2"><span>✦</span> 3-day delivery</li>
+        <li class="flex items-center gap-2"><span>✦</span> 1 revision</li>
+       </ul><button onclick="showToast('Request sent for Sketch tier!')" class="w-full mt-8 font-heading text-xs tracking-widest uppercase border border-neutral-700 py-3 hover:bg-white hover:text-black transition-all">Request</button>
+      </div>
+      <div class="commission-tier border border-white p-8 relative anim-fade delay-2">
+       <div class="absolute -top-3 right-6 bg-white text-black font-heading text-xs tracking-widest px-3 py-1">
+        ✦ POPULAR
+       </div>
+       <div class="text-neutral-400 font-heading text-xs tracking-widest uppercase">
+        Portrait
+       </div>
+       <div class="font-heading text-3xl font-bold mt-2">
+        $120
+       </div>
+       <div class="text-neutral-600 text-xs mt-1 font-heading">
+        Full grayscale rendering
+       </div>
+       <ul class="mt-6 space-y-3 text-sm text-neutral-400">
+        <li class="flex items-center gap-2"><span>✦</span> Single character + detail</li>
+        <li class="flex items-center gap-2"><span>✦</span> Full grayscale shading</li>
+        <li class="flex items-center gap-2"><span>✦</span> 5-day delivery</li>
+        <li class="flex items-center gap-2"><span>✦</span> 3 revisions</li>
+        <li class="flex items-center gap-2"><span>✦</span> Celebrity style available</li>
+       </ul><button onclick="showToast('Request sent for Portrait tier!')" class="w-full mt-8 font-heading text-xs tracking-widest uppercase bg-white text-black py-3 hover:bg-neutral-200 transition-all">Request</button>
+      </div>
+      <div class="commission-tier border border-neutral-800 p-8 anim-fade delay-3">
+       <div class="text-neutral-600 font-heading text-xs tracking-widest uppercase">
+        Editorial
+       </div>
+       <div class="font-heading text-3xl font-bold mt-2">
+        $250+
+       </div>
+       <div class="text-neutral-600 text-xs mt-1 font-heading">
+        Complex scene / multi-char
+       </div>
+       <ul class="mt-6 space-y-3 text-sm text-neutral-400">
+        <li class="flex items-center gap-2"><span>✦</span> Up to 3 characters</li>
+        <li class="flex items-center gap-2"><span>✦</span> Background included</li>
+        <li class="flex items-center gap-2"><span>✦</span> 10-day delivery</li>
+        <li class="flex items-center gap-2"><span>✦</span> 5 revisions</li>
+        <li class="flex items-center gap-2"><span>✦</span> Print-ready resolution</li>
+       </ul><button onclick="showToast('Request sent for Editorial tier!')" class="w-full mt-8 font-heading text-xs tracking-widest uppercase border border-neutral-700 py-3 hover:bg-white hover:text-black transition-all">Request</button>
+      </div>
+     </div><!-- How It Works -->
+     <div class="mt-16 border border-neutral-900 p-8 anim-fade delay-4">
+      <h3 class="font-heading text-lg font-bold">How It Works</h3>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mt-6 text-sm text-neutral-400">
+       <div><span class="text-white font-heading font-bold text-2xl">01</span>
+        <p class="mt-2">Send a request with your references and idea.</p>
+       </div>
+       <div><span class="text-white font-heading font-bold text-2xl">02</span>
+        <p class="mt-2">Receive a quote and timeline confirmation.</p>
+       </div>
+       <div><span class="text-white font-heading font-bold text-2xl">03</span>
+        <p class="mt-2">Approve the rough sketch before rendering.</p>
+       </div>
+       <div><span class="text-white font-heading font-bold text-2xl">04</span>
+        <p class="mt-2">Final piece delivered in high resolution.</p>
+       </div>
+      </div>
+     </div><!-- Terms of Service -->
+     <div class="mt-12 border border-neutral-900 p-8 anim-fade delay-5">
+      <h3 class="font-heading text-lg font-bold mb-4">Terms of Service</h3>
+      <div class="space-y-4 text-sm text-neutral-400 accordion-group">
+       <div class="accordion-header accordion-open">
+        <div class="flex items-center gap-3 pb-3 border-b border-neutral-800"><span class="font-heading text-xs tracking-widest uppercase font-semibold">Payment &amp; Deposits</span> <span class="ml-auto text-neutral-600">+</span>
+        </div>
+        <div class="accordion-content mt-3 pb-3">
+         <p>A 50% non-refundable deposit is required to secure your commission slot. Final payment is due upon completion before delivery. I accept payment through PayPal, Stripe, and bank transfer.</p>
+        </div>
+       </div>
+       <div class="accordion-header">
+        <div class="flex items-center gap-3 pb-3 border-b border-neutral-800"><span class="font-heading text-xs tracking-widest uppercase font-semibold">Usage Rights</span> <span class="ml-auto text-neutral-600">+</span>
+        </div>
+        <div class="accordion-content mt-3 pb-3">
+         <p>Upon full payment, you receive personal use rights. Commercial use, merchandise resale, or reproduction requires written permission and additional licensing fees. All artwork remains my intellectual property unless otherwise agreed.</p>
+        </div>
+       </div>
+       <div class="accordion-header">
+        <div class="flex items-center gap-3 pb-3 border-b border-neutral-800"><span class="font-heading text-xs tracking-widest uppercase font-semibold">Revisions &amp; Deliverables</span> <span class="ml-auto text-neutral-600">+</span>
+        </div>
+        <div class="accordion-content mt-3 pb-3">
+         <p>The number of revisions is tier-dependent and applies to major changes only. Minor tweaks are included. Revisions must be requested within 7 days of first draft. Additional revisions beyond the limit will incur a fee of $25 each.</p>
+        </div>
+       </div>
+       <div class="accordion-header">
+        <div class="flex items-center gap-3 pb-3 border-b border-neutral-800"><span class="font-heading text-xs tracking-widest uppercase font-semibold">Cancellation Policy</span> <span class="ml-auto text-neutral-600">+</span>
+        </div>
+        <div class="accordion-content mt-3 pb-3">
+         <p>If you cancel before work begins, your deposit is non-refundable but can be applied to a future commission. Cancellations after work has started will result in no refund. Refunds for my cancellation (rare) are issued in full within 14 days.</p>
+        </div>
+       </div>
+       <div class="accordion-header">
+        <div class="flex items-center gap-3 pb-3 border-b border-neutral-800"><span class="font-heading text-xs tracking-widest uppercase font-semibold">Timeline</span> <span class="ml-auto text-neutral-600">+</span>
+        </div>
+        <div class="accordion-content mt-3 pb-3">
+         <p>Delivery times are estimates. Rush fees of 50% apply for expedited delivery. I cannot guarantee delivery during personal emergencies or health issues. Final artwork will be delivered as a digital file (PNG/PSD/PDF as agreed).</p>
+        </div>
+       </div>
+       <div class="accordion-header">
+        <div class="flex items-center gap-3 pb-3 border-b border-neutral-800"><span class="font-heading text-xs tracking-widest uppercase font-semibold">Credit &amp; Sharing</span> <span class="ml-auto text-neutral-600">+</span>
+        </div>
+        <div class="accordion-content mt-3 pb-3">
+         <p>I reserve the right to share your commissioned work on my portfolio and social media with proper credit. If you wish for your commission to remain private, this must be agreed upon beforehand at no additional cost.</p>
+        </div>
+       </div>
+      </div>
+     </div><!-- Contact for Commissions -->
+     <div class="mt-12 border border-white p-8 anim-fade delay-6">
+      <h3 class="font-heading text-lg font-bold">Ready to Collaborate?</h3>
+      <p class="text-neutral-400 mt-3 text-sm">Email me with your project details, references, and preferred tier. I'll respond within 24 hours.</p><a href="mailto:koshdi22@gmail.com" class="inline-block mt-6 font-heading text-xs tracking-widest uppercase bg-white text-black px-8 py-3 hover:bg-neutral-200 transition-colors"> ✉ koshdi22@gmail.com </a>
+     </div>
+    </div>
+   </section><!-- PROJECTS -->
+   <section id="page-projects" class="section-hidden pt-20">
+    <div class="max-w-6xl mx-auto px-6 py-16">
+     <h2 class="font-heading text-4xl font-bold anim-fade">Projects</h2>
+     <p class="text-neutral-500 mt-2 anim-fade delay-1">Collaborative and personal projects exploring celebrity culture through ink.</p>
+     <div class="space-y-8 mt-12">
+      <div class="border border-neutral-800 p-8 hover:border-neutral-600 transition-colors anim-fade delay-1">
+       <div class="flex items-start justify-between">
+        <div>
+         <p class="font-heading text-xs tracking-widest uppercase text-neutral-600">Ongoing — 2024</p>
+         <h3 class="font-heading text-2xl font-bold mt-2">✦ ICONS Series</h3>
+         <p class="text-neutral-400 mt-3 max-w-2xl">A long-form portrait series reimagining cultural icons — musicians, actors, and public figures — as stark black-and-white ink studies. Each piece strips away the glamour to reveal raw human expression.</p>
+        </div><span class="text-3xl star-icon">✦</span>
+       </div>
+       <div class="flex gap-3 mt-6 flex-wrap">
+        <span class="font-heading text-xs tracking-widest uppercase border border-neutral-800 px-3 py-1 text-neutral-500">12 Pieces</span> <span class="font-heading text-xs tracking-widest uppercase border border-neutral-800 px-3 py-1 text-neutral-500">Ink</span> <span class="font-heading text-xs tracking-widest uppercase border border-neutral-800 px-3 py-1 text-neutral-500">Portrait</span>
+       </div>
+      </div>
+      <div class="border border-neutral-800 p-8 hover:border-neutral-600 transition-colors anim-fade delay-2">
+       <div class="flex items-start justify-between">
+        <div>
+         <p class="font-heading text-xs tracking-widest uppercase text-neutral-600">Completed — 2023</p>
+         <h3 class="font-heading text-2xl font-bold mt-2">Paparazzi Zine</h3>
+         <p class="text-neutral-400 mt-3 max-w-2xl">A self-published 32-page zine exploring the relationship between celebrity and surveillance. Hand-drawn illustrations paired with found text from tabloid headlines.</p>
+        </div><span class="text-3xl star-icon">✦</span>
+       </div>
+       <div class="flex gap-3 mt-6 flex-wrap">
+        <span class="font-heading text-xs tracking-widest uppercase border border-neutral-800 px-3 py-1 text-neutral-500">Zine</span> <span class="font-heading text-xs tracking-widest uppercase border border-neutral-800 px-3 py-1 text-neutral-500">32 Pages</span> <span class="font-heading text-xs tracking-widest uppercase border border-neutral-800 px-3 py-1 text-neutral-500">Mixed Media</span>
+       </div>
+      </div>
+      <div class="border border-neutral-800 p-8 hover:border-neutral-600 transition-colors anim-fade delay-3">
+       <div class="flex items-start justify-between">
+        <div>
+         <p class="font-heading text-xs tracking-widest uppercase text-neutral-600">Completed — 2023</p>
+         <h3 class="font-heading text-2xl font-bold mt-2">Red Carpet Ghosts</h3>
+         <p class="text-neutral-400 mt-3 max-w-2xl">An editorial collaboration with an independent fashion magazine. Spectral, high-contrast portraits of unnamed figures in couture — celebrities rendered as silhouettes and energy.</p>
+        </div><span class="text-3xl star-icon">✦</span>
+       </div>
+       <div class="flex gap-3 mt-6 flex-wrap">
+        <span class="font-heading text-xs tracking-widest uppercase border border-neutral-800 px-3 py-1 text-neutral-500">Editorial</span> <span class="font-heading text-xs tracking-widest uppercase border border-neutral-800 px-3 py-1 text-neutral-500">8 Illustrations</span> <span class="font-heading text-xs tracking-widest uppercase border border-neutral-800 px-3 py-1 text-neutral-500">Collaboration</span>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- ABOUT -->
+   <section id="page-about" class="section-hidden pt-20">
+    <div class="max-w-6xl mx-auto px-6 py-16">
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+      <div>
+       <h2 class="font-heading text-4xl font-bold anim-fade">About</h2>
+       <p class="text-neutral-600 text-sm mt-2 anim-fade delay-1">she / her — 🇺🇦 Ukrainian-based artist</p>
+       <p id="about-text" class="text-neutral-400 mt-6 leading-relaxed anim-fade delay-1">KOSHDI is a digital 2D artist specializing in black-and-white portraiture and celebrity illustration. Working at the intersection of pop culture and fine art, my work explores fame, identity, and the mythology we build around public figures. Each piece captures not just likeness but essence — the quality that makes someone unforgettable.</p>
+       <p class="text-neutral-400 mt-4 leading-relaxed anim-fade delay-2">With a style rooted in high-contrast ink techniques translated to digital, I create intimate portraits of celebrities both known and emerging. I believe in celebrating the human beneath the fame.</p>
+       <div class="mt-10 space-y-4 anim-fade delay-3">
+        <h3 class="font-heading text-sm tracking-widest uppercase text-neutral-500">Experience</h3>
+        <div class="space-y-3 text-sm text-neutral-400">
+         <div class="flex justify-between border-b border-neutral-900 pb-2">
+          <span>Freelance Illustrator</span><span class="text-neutral-600">2020 — Present</span>
+         </div>
+         <div class="flex justify-between border-b border-neutral-900 pb-2">
+          <span>Editorial Artist, MONO Magazine</span><span class="text-neutral-600">2022 — 2023</span>
+         </div>
+         <div class="flex justify-between border-b border-neutral-900 pb-2">
+          <span>Guest Artist, CelebCon</span><span class="text-neutral-600">2023</span>
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="anim-scale delay-2">
+       <div class="aspect-square bg-neutral-950 border border-neutral-800 flex items-center justify-center relative">
+        <svg viewbox="0 0 200 200" class="w-3/4 h-3/4">
+         <circle cx="100" cy="100" r="80" fill="none" stroke="#333" stroke-width="0.5" stroke-dasharray="4 4" /> <circle cx="100" cy="100" r="50" fill="none" stroke="#555" stroke-width="0.3" /> <text x="100" y="95" text-anchor="middle" fill="#fff" font-size="40" font-family="Syne">
+          ✦
+         </text> <text x="100" y="120" text-anchor="middle" fill="#666" font-size="7" font-family="Syne" letter-spacing="4">
+          KOSHDI
+         </text>
+        </svg>
+       </div>
+       <div class="mt-6 grid grid-cols-3 gap-4 text-center anim-fade delay-3">
+        <div class="border border-neutral-900 p-4">
+         <div class="font-heading text-2xl font-bold">
+          200+
+         </div>
+         <div class="text-neutral-600 text-xs font-heading tracking-widest mt-1">
+          Works
+         </div>
+        </div>
+        <div class="border border-neutral-900 p-4">
+         <div class="font-heading text-2xl font-bold">
+          80+
+         </div>
+         <div class="text-neutral-600 text-xs font-heading tracking-widest mt-1">
+          Clients
+         </div>
+        </div>
+        <div class="border border-neutral-900 p-4">
+         <div class="font-heading text-2xl font-bold">
+          4yr
+         </div>
+         <div class="text-neutral-600 text-xs font-heading tracking-widest mt-1">
+          Active
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+     <div class="mt-16 border-t border-neutral-900 pt-10 anim-fade delay-4">
+      <h3 class="font-heading text-sm tracking-widest uppercase text-neutral-500 mb-4">Connect</h3>
+      <div class="flex gap-6 flex-wrap"><a href="mailto:koshdi22@gmail.com" class="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm"> <i data-lucide="mail" class="w-4 h-4"></i> koshdi22@gmail.com </a> <a href="#" class="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm"> <i data-lucide="instagram" class="w-4 h-4"></i> Instagram </a> <a href="#" class="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm"> <i data-lucide="twitter" class="w-4 h-4"></i> Twitter </a>
+      </div>
+     </div>
+    </div>
+   </section><!-- FOOTER -->
+   <footer class="border-t border-neutral-900 mt-10">
+    <div class="max-w-6xl mx-auto px-6 py-8 flex items-center justify-between text-xs text-neutral-600 font-heading tracking-widest flex-wrap gap-4">
+     <span>© 2024 KOSHDI</span> <span>✦ ALL WORKS ORIGINAL ✦</span>
+    </div>
+   </footer><!-- Toast -->
+   <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-white text-black font-heading text-xs tracking-widest px-6 py-3 opacity-0 pointer-events-none transition-all duration-300" style="transform: translate(-50%, 20px);"></div>
+  </div>
+  <script>
+    // Gallery data
+    const galleryItems = [
+      { title: "The Idol", cat: "portrait", symbol: "✦", desc: "Ink study of an unnamed pop icon" },
+      { title: "Spotlight Fade", cat: "editorial", symbol: "✦", desc: "Editorial piece on fleeting fame" },
+      { title: "Phantom Premiere", cat: "concept", symbol: "✦", desc: "Abstract red carpet figure" },
+      { title: "Golden Age", cat: "portrait", symbol: "✦", desc: "Old Hollywood reimagined" },
+      { title: "Tabloid Ghost", cat: "editorial", symbol: "✦", desc: "Paparazzi perspective study" },
+      { title: "Muse No. 7", cat: "portrait", symbol: "✦", desc: "Seventh in the muse series" },
+      { title: "After the Flash", cat: "concept", symbol: "✦", desc: "Post-fame conceptual piece" },
+      { title: "Silhouette Star", cat: "portrait", symbol: "✦", desc: "Minimalist celebrity silhouette" },
+      { title: "Ink & Glamour", cat: "editorial", symbol: "✦", desc: "Fashion editorial collaboration" },
+    ];
+
+    function buildGallery(filter) {
+      const grid = document.getElementById('gallery-grid');
+      grid.innerHTML = '';
+      const items = filter === 'all' ? galleryItems : galleryItems.filter(i => i.cat === filter);
+      items.forEach((item, idx) => {
+        const el = document.createElement('div');
+        el.className = `gallery-item border border-neutral-800 cursor-pointer anim-fade`;
+        el.style.animationDelay = `${idx * 0.08}s`;
+        el.innerHTML = `
+          <div class="aspect-[3/4] bg-neutral-950 flex items-center justify-center text-5xl relative overflow-hidden group">
+            <span class="transition-transform duration-500 group-hover:scale-125">${item.symbol}</span>
+            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+              <p class="font-heading text-xs tracking-widest uppercase">${item.title}</p>
+              <p class="text-neutral-500 text-xs mt-1">${item.desc}</p>
+            </div>
+          </div>
+          <div class="p-4">
+            <p class="font-heading text-sm font-semibold">${item.title}</p>
+            <p class="text-neutral-600 text-xs font-heading tracking-widest uppercase mt-1">${item.cat}</p>
+          </div>
+        `;
+        grid.appendChild(el);
+      });
+    }
+
+    function filterGallery(cat) {
+      document.querySelectorAll('.gallery-filter').forEach(b => {
+        b.classList.remove('border-white', 'text-white');
+        b.classList.add('border-neutral-800', 'text-neutral-500');
+      });
+      document.querySelector(`.gallery-filter[data-filter="${cat}"]`).classList.add('border-white', 'text-white');
+      document.querySelector(`.gallery-filter[data-filter="${cat}"]`).classList.remove('border-neutral-800', 'text-neutral-500');
+      buildGallery(cat);
+    }
+
+    // Navigation
+    function navigate(page) {
+      document.querySelectorAll('[id^="page-"]').forEach(s => { s.className = 'section-hidden'; });
+      document.getElementById('page-' + page).className = 'section-visible';
+      document.querySelectorAll('[data-nav]').forEach(a => a.classList.remove('active'));
+      const navEl = document.querySelector(`[data-nav="${page}"]`);
+      if (navEl) navEl.classList.add('active');
+      document.getElementById('app').scrollTop = 0;
+      if (page === 'gallery') buildGallery('all');
+      if (page === 'gallery') filterGallery('all');
+    }
+
+    // Toast
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.opacity = '1';
+      t.style.transform = 'translate(-50%, 0)';
+      setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translate(-50%, 20px)'; }, 2500);
+    }
+
+    // Accordion for TOS
+    document.querySelectorAll('.accordion-header').forEach(header => {
+      header.addEventListener('click', function() {
+        this.parentElement.classList.toggle('accordion-open');
+      });
+    });
+
+    // Element SDK
+    const defaultConfig = {
+      artist_name: 'KOSHDI',
+      artist_tagline: 'Turning celebrities into ink-stained dreams. Portraits that blur the line between fame and fantasy.',
+      artist_email: 'koshdi22@gmail.com',
+      about_text: 'KOSHDI is a digital 2D artist specializing in black-and-white portraiture and celebrity illustration. Working at the intersection of pop culture and fine art, my work explores fame, identity, and the mythology we build around public figures.',
+      commission_note: 'OPEN',
+      background_color: '#000000',
+      surface_color: '#0a0a0a',
+      text_color: '#ffffff',
+      accent_color: '#a3a3a3',
+      muted_color: '#525252',
+      font_family: 'Syne',
+      font_size: 16
+    };
+
+    function applyConfig(config) {
+      const c = Object.assign({}, defaultConfig, config);
+      const font = c.font_family || defaultConfig.font_family;
+      const size = c.font_size || defaultConfig.font_size;
+
+      // Text
+      document.getElementById('hero-name').innerHTML = c.artist_name;
+      document.getElementById('nav-logo').textContent = '✦ ' + c.artist_name + ' ✦';
+      document.getElementById('hero-tagline').textContent = c.artist_tagline;
+      document.getElementById('about-text').textContent = c.about_text;
+      const statusSpan = document.querySelector('#commission-status span');
+      if (statusSpan) statusSpan.textContent = c.commission_note;
+
+      // Colors
+      const app = document.getElementById('app');
+      app.style.backgroundColor = c.background_color;
+      app.style.color = c.text_color;
+      document.querySelectorAll('.commission-tier, .border-neutral-800, .testimonial-card').forEach(el => {
+        el.style.borderColor = c.muted_color + '40';
+      });
+
+      // Font
+      document.querySelectorAll('.font-heading').forEach(el => {
+        el.style.fontFamily = `${font}, Syne, sans-serif`;
+      });
+      document.querySelectorAll('.font-body, p, li').forEach(el => {
+        el.style.fontFamily = `${font}, Playfair Display, serif`;
+      });
+
+      // Font size
+      document.getElementById('hero-name').style.fontSize = `${size * 4}px`;
+      document.getElementById('hero-tagline').style.fontSize = `${size * 1.1}px`;
+      document.querySelectorAll('p').forEach(el => { el.style.fontSize = `${size}px`; });
+    }
+
+    window.elementSdk.init({
+      defaultConfig,
+      onConfigChange: async (config) => applyConfig(config),
+      mapToCapabilities: (config) => ({
+        recolorables: [
+          { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+          { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+          { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+          { get: () => config.accent_color || defaultConfig.accent_color, set: (v) => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); } },
+          { get: () => config.muted_color || defaultConfig.muted_color, set: (v) => { config.muted_color = v; window.elementSdk.setConfig({ muted_color: v }); } },
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => config.font_family || defaultConfig.font_family,
+          set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+        },
+        fontSizeable: {
+          get: () => config.font_size || defaultConfig.font_size,
+          set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+        }
+      }),
+      mapToEditPanelValues: (config) => new Map([
+        ['artist_name', config.artist_name || defaultConfig.artist_name],
+        ['artist_tagline', config.artist_tagline || defaultConfig.artist_tagline],
+        ['artist_email', config.artist_email || defaultConfig.artist_email],
+        ['about_text', config.about_text || defaultConfig.about_text],
+        ['commission_note', config.commission_note || defaultConfig.commission_note],
+      ])
+    });
+
+    // Init
+    lucide.createIcons();
+    buildGallery('all');
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f3059c5d56877aa',t:'MTc3NzMxOTM2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
