@@ -7,6 +7,10 @@ body {
   box-sizing: border-box;
 }
 
+body.no-scroll {
+  overflow: hidden;
+}
+
 .font-display {
   font-family: 'Playfair Display', serif;
 }
