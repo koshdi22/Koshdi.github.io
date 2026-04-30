@@ -1,474 +1,516 @@
 <!doctype html>
 <html lang="en" class="h-full">
-<head>
+ <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KOSHDI — 2D Artist</title>
-
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-
-  <!-- Icons -->
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-  <!-- Tailwind config -->
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=DM+Sans:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
   <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            cream: '#efdecd',
-            dark: '#1e1d21',
-            light: '#f5f5f5',
-          }
-        }
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        cream: '#efdecd',
+        dark: '#1e1d21',
+        light: '#f5f5f5',
       }
     }
-  </script>
-
-  <link rel="stylesheet" href="styles.css">
-</head>
-
-<body class="h-full bg-light text-dark">
-
-  <div id="app-wrapper" class="min-h-screen w-full flex flex-col">
-
-    <!-- NAV -->
-    <nav id="main-nav" class="w-full flex items-center justify-between px-6 md:px-12 py-5 border-b border-dark/10 bg-light/90 backdrop-blur-sm sticky top-0 z-[9999] shrink-0">
-      <div class="font-display text-xl font-bold tracking-tight cursor-pointer" onclick="navigate('home')">
-        KOSHDI
-      </div>
-
-      <div class="nav-container flex items-center gap-6 md:gap-8 text-sm font-medium tracking-wide uppercase">
-        <span class="nav-link active-link" data-page="home" onclick="navigate('home')">Home</span>
-        <span class="nav-link" data-page="gallery" onclick="navigate('gallery')">Gallery</span>
-        <span class="nav-link" data-page="commissions" onclick="navigate('commissions')">Commissions</span>
-        <span class="nav-link" data-page="testimonials" onclick="navigate('testimonials')">Testimonials</span>
-        <span class="nav-link" data-page="projects" onclick="navigate('projects')">Projects</span>
-        <span class="nav-link" data-page="about" onclick="navigate('about')">About</span>
-      </div>
-    </nav>
-
-    <!-- MAIN -->
-    <main class="flex-1 w-full">
-
-      <!-- HOME -->
-<div id="page-home" class="page flex-col min-h-screen relative overflow-hidden active">
-
-  <!-- CENTER CONTENT -->
-  <div class="flex flex-col items-center justify-center text-center px-6 h-screen pb-20">
-
-    <p class="text-xs uppercase tracking-[0.3em] text-dark/50 mb-4 fade-in stagger-1">
-      2D Artist & Illustrator
-    </p>
-
-    <h1 class="font-display text-6xl md:text-8xl lg:text-9xl font-bold tracking-tight fade-in stagger-2">
-      KOSHDI
-    </h1>
-
-    <p class="mt-4 text-lg md:text-xl text-dark/60 font-light max-w-md fade-in stagger-3">
-      Capturing stars in ink & pixel
-    </p>
-
-    <div class="mt-10 flex gap-4 fade-in stagger-4">
-      <button onclick="navigate('gallery')" class="px-8 py-3 bg-dark text-light text-sm uppercase hover:bg-dark/80 transition">
-        View Works
-      </button>
-
-      <button onclick="navigate('commissions')" class="px-8 py-3 border border-dark text-sm uppercase hover:bg-dark hover:text-light transition">
-        Commission
-      </button>
+  }
+}
+</script>
+  <style>
+  html { visibility: hidden; }
+  body { height: 100%; margin: 0; }
+  body { font-family: 'DM Sans', sans-serif; }
+  .font-display { font-family: 'Playfair Display', serif; }
+  .page { display: none; }
+  .page.active { display: flex; }
+  .nav-link { position: relative; cursor: pointer; transition: color 0.3s; white-space: nowrap; display: inline-block; padding-bottom: 4px; /* чтобы линия не прилипала */ }
+  .nav-link::after { content: ''; position: absolute; left: 0; bottom: 0; width: 100%; height: 2px; background: #1e1d21; transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; }
+  .nav-link:hover::after,
+  .nav-link.active-link::after { transform: scaleX(1); }
+  .fade-in { animation: fadeIn 0.6s ease forwards; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .stagger-1 { animation-delay: 0.1s; opacity: 0; }
+  .stagger-2 { animation-delay: 0.2s; opacity: 0; }
+  .stagger-3 { animation-delay: 0.3s; opacity: 0; }
+  .stagger-4 { animation-delay: 0.4s; opacity: 0; }
+  .gallery-item { transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s; }
+  .gallery-item:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(30,29,33,0.15); }
+  .marquee { overflow: hidden; white-space: nowrap; }
+  .marquee-inner { display: inline-block; animation: marquee 20s linear infinite; }
+  @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #1e1d21; border-radius: 3px; }
+  .nav-container { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .nav-container::-webkit-scrollbar { display: none; }
+  .gallery-filter.active { border-color: #1e1d21; color: #1e1d21; }
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-light text-dark">
+  <div id="app-wrapper" class="h-full w-full flex flex-col overflow-hidden">
+   <!-- Nav -->
+   <nav id="main-nav" class="w-full flex items-center justify-between px-6 md:px-12 py-5 border-b border-dark/10 bg-light/90 backdrop-blur-sm sticky top-0 z-50 shrink-0">
+    <div class="font-display text-xl font-bold tracking-tight cursor-pointer" onclick="navigate('home')">
+     KOSHDI
     </div>
-
-  </div>
-
-  <!-- MARQUEE FIXED BOTTOM -->
+    <div class="nav-container flex items-center gap-6 md:gap-8 text-sm font-medium tracking-wide uppercase">
+     <span class="nav-link active-link" data-page="home" onclick="navigate('home')">Home</span> <span class="nav-link" data-page="gallery" onclick="navigate('gallery')">Gallery</span> <span class="nav-link" data-page="commissions" onclick="navigate('commissions')">Commissions</span> <span class="nav-link" data-page="testimonials" onclick="navigate('testimonials')">Testimonials</span> <span class="nav-link" data-page="projects" onclick="navigate('projects')">Projects</span> <span class="nav-link" data-page="about" onclick="navigate('about')">About</span>
+    </div>
+   </nav><!-- Pages Container -->
+   <div class="flex-1 overflow-auto w-full">
+    <!-- HOME PAGE -->
+    <div id="page-home" class="page flex-col h-full">
+    <div class="flex flex-col items-center justify-center px-6 text-center" style="height: calc(100vh - 60px);">
+      <div class="fade-in stagger-1">
+       <p class="text-xs uppercase tracking-[0.3em] text-dark/50 mb-4">2D Artist &amp; Illustrator</p>
+      </div>
+      <h1 class="font-display text-6xl md:text-8xl lg:text-9xl font-bold tracking-tight fade-in stagger-2">KOSHDI</h1>
+      <p id="home-tagline" class="mt-4 text-lg md:text-xl text-dark/60 font-light max-w-md fade-in stagger-3">Capturing stars in ink &amp; pixel</p>
+      <div class="mt-10 flex gap-4 fade-in stagger-4"><button onclick="navigate('gallery')" class="px-8 py-3 bg-dark text-light text-sm font-medium tracking-wide uppercase hover:bg-dark/80 transition">View Works</button> <button onclick="navigate('commissions')" class="px-8 py-3 border border-dark text-sm font-medium tracking-wide uppercase hover:bg-dark hover:text-light transition">Commission</button>
+      </div>
+     </div><!-- Celebrity marquee -->
      <div class="border-t border-dark/10 py-4 marquee shrink-0">
       <div class="marquee-inner text-sm uppercase tracking-[0.2em] text-dark/30 font-medium"><span class="mx-8">★ Celebrity Portraits</span><span class="mx-8">★ Fan Art</span><span class="mx-8">★ Original Characters</span><span class="mx-8">★ Editorial Illustration</span><span class="mx-8">★ Celebrity Portraits</span><span class="mx-8">★ Fan Art</span><span class="mx-8">★ Original Characters</span><span class="mx-8">★ Editorial Illustration</span>
-  </div>
+      </div>
+     </div>
+    </div><!-- GALLERY PAGE -->
+    <div id="page-gallery" class="page flex-col px-6 md:px-12 py-12">
+     <div class="fade-in stagger-1">
+      <h2 class="font-display text-4xl md:text-5xl font-bold mb-2">Gallery</h2>
+      <p class="text-dark/50 mb-8">Selected works from the Celebrity Portrait Series and beyond.</p>
+     </div>
+     <div class="flex gap-3 mb-10 flex-wrap fade-in stagger-2">
+      <button class="gallery-filter active px-4 py-2 border border-dark text-dark text-xs uppercase tracking-wider font-semibold transition" data-filter="all" onclick="filterGallery('all')">All</button> <button class="gallery-filter px-4 py-2 border border-dark/20 text-dark/50 text-xs uppercase tracking-wider font-semibold hover:border-dark/50 transition" data-filter="portrait" onclick="filterGallery('portrait')">Portraits</button> <button class="gallery-filter px-4 py-2 border border-dark/20 text-dark/50 text-xs uppercase tracking-wider font-semibold hover:border-dark/50 transition" data-filter="editorial" onclick="filterGallery('editorial')">Editorial</button> <button class="gallery-filter px-4 py-2 border border-dark/20 text-dark/50 text-xs uppercase tracking-wider font-semibold hover:border-dark/50 transition" data-filter="concept" onclick="filterGallery('concept')">Concept</button>
+     </div>
+     <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 fade-in stagger-3">
+      <div class="gallery-item bg-dark/5 aspect-[3/4] rounded-sm overflow-hidden cursor-pointer group relative" data-category="portrait" onclick="openLightbox('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&amp;h=750&amp;fit=crop')">
+       <div class="absolute inset-0 bg-gradient-to-b from-cream/20 to-dark/10 group-hover:opacity-70 transition-opacity"></div>
+       <div class="absolute inset-0 flex items-center justify-center"><span class="text-5xl group-hover:scale-110 transition-transform">🎤</span>
+       </div>
+       <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+        <p class="text-light text-xs font-semibold uppercase tracking-wider">Celebrity Study I</p>
+       </div>
+      </div>
+      <div class="gallery-item bg-cream/40 aspect-[3/4] rounded-sm overflow-hidden cursor-pointer group relative" data-category="portrait" onclick="openLightbox('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&amp;h=750&amp;fit=crop')">
+       <div class="absolute inset-0 bg-gradient-to-br from-dark/5 to-cream/30 group-hover:opacity-70 transition-opacity"></div>
+       <div class="absolute inset-0 flex items-center justify-center"><span class="text-5xl group-hover:scale-110 transition-transform">🎬</span>
+       </div>
+       <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+        <p class="text-light text-xs font-semibold uppercase tracking-wider">Portrait Commission</p>
+       </div>
+      </div>
+      <div class="gallery-item bg-dark/8 aspect-[3/4] rounded-sm overflow-hidden cursor-pointer group relative" data-category="concept" onclick="openLightbox('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&amp;h=750&amp;fit=crop')">
+       <div class="absolute inset-0 bg-gradient-to-t from-dark/15 to-transparent group-hover:opacity-70 transition-opacity"></div>
+       <div class="absolute inset-0 flex items-center justify-center"><span class="text-5xl group-hover:scale-110 transition-transform">🌟</span>
+       </div>
+       <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+        <p class="text-light text-xs font-semibold uppercase tracking-wider">Star Series</p>
+       </div>
+      </div>
+      <div class="gallery-item bg-cream/30 aspect-[3/4] rounded-sm overflow-hidden cursor-pointer group relative" data-category="concept" onclick="openLightbox('https://images.unsplash.com/photo-1502716991646-c1400ca199e3?w=600&amp;h=750&amp;fit=crop')">
+       <div class="absolute inset-0 group-hover:opacity-70 transition-opacity"></div>
+       <div class="absolute inset-0 flex items-center justify-center"><span class="text-5xl group-hover:scale-110 transition-transform">🎭</span>
+       </div>
+       <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+        <p class="text-light text-xs font-semibold uppercase tracking-wider">Character Design</p>
+       </div>
+      </div>
+      <div class="gallery-item bg-dark/6 aspect-[3/4] rounded-sm overflow-hidden cursor-pointer group relative" data-category="editorial" onclick="openLightbox('https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&amp;h=750&amp;fit=crop')">
+       <div class="absolute inset-0 group-hover:opacity-70 transition-opacity"></div>
+       <div class="absolute inset-0 flex items-center justify-center"><span class="text-5xl group-hover:scale-110 transition-transform">✨</span>
+       </div>
+       <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+        <p class="text-light text-xs font-semibold uppercase tracking-wider">Editorial Piece</p>
+       </div>
+      </div>
+      <div class="gallery-item bg-cream/50 aspect-[3/4] rounded-sm overflow-hidden cursor-pointer group relative" data-category="editorial" onclick="openLightbox('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&amp;h=750&amp;fit=crop')">
+       <div class="absolute inset-0 group-hover:opacity-70 transition-opacity"></div>
+       <div class="absolute inset-0 flex items-center justify-center"><span class="text-5xl group-hover:scale-110 transition-transform">💫</span>
+       </div>
+       <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+        <p class="text-light text-xs font-semibold uppercase tracking-wider">Fan Art</p>
+       </div>
+      </div>
+     </div>
+    </div><!-- Lightbox Modal -->
+    <div id="lightbox" class="hidden fixed inset-0 bg-dark/90 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="closeLightbox(event)">
+     <button onclick="closeLightbox()" class="absolute top-6 right-6 text-light hover:text-light/70 transition" style="z-index: 51;"><i data-lucide="x" style="width:32px;height:32px;"></i></button> <img id="lightbox-img" src="" alt="Fullscreen view" class="max-w-full max-h-[90vh] object-contain" onclick="event.stopPropagation()">
+    </div><!-- COMMISSIONS PAGE -->
+    <div id="page-commissions" class="page flex-col px-6 md:px-12 py-12">
+     <div class="fade-in stagger-1">
+      <h2 class="font-display text-4xl md:text-5xl font-bold mb-2">Commissions</h2>
+      <p class="text-dark/50 mb-6">Pricing, process &amp; FAQs</p>
+      <div class="inline-block mb-12"><span id="comm-status" class="text-xs font-semibold uppercase tracking-[0.2em] px-4 py-1.5 border border-dark bg-dark text-light">OPEN</span>
+      </div>
+     </div><!-- Pricing Section -->
+     <div class="mb-16">
+      <h3 class="font-display text-2xl font-bold mb-6 fade-in stagger-2">Pricing</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-in stagger-3">
+       <div class="border border-dark/10 p-8 hover:border-dark/30 transition">
+        <p class="text-xs uppercase tracking-[0.2em] text-dark/50 font-semibold">Sketch</p>
+        <h3 class="font-display text-3xl font-bold mt-2 mb-1">$50</h3>
+        <p class="text-xs text-dark/40 mb-6">Black &amp; white linework</p>
+        <ul class="space-y-2 text-sm text-dark/60">
+         <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>Single character</span></li>
+         <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>Clean lineart</span></li>
+         <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>3-day delivery</span></li>
+         <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>1 revision</span></li>
+        </ul>
+       </div>
+       <div class="border border-dark/10 p-8 hover:border-dark/30 transition">
+  <p class="text-xs uppercase tracking-[0.2em] text-dark/50 font-semibold">Portrait</p>
+  <h3 class="font-display text-3xl font-bold mt-2 mb-1">$120</h3>
+  <p class="text-xs text-dark/40 mb-6">Full grayscale rendering</p>
+  <ul class="space-y-2 text-sm text-dark/60">
+    <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>Single character + detail</span></li>
+    <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>Full grayscale shading</span></li>
+    <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>5-day delivery</span></li>
+    <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>3 revisions</span></li>
+    <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>Celebrity style available</span></li>
+  </ul>
 </div>
-</div>
-
-      <!-- GALLERY -->
-      <div id="page-gallery" class="page flex-col px-6 md:px-12 py-12">
-        <div class="fade-in stagger-1">
-          <h2 class="font-display text-4xl md:text-5xl font-bold mb-2">Gallery</h2>
-          <p class="text-dark/50 mb-8">Selected works from the Celebrity Portrait Series and beyond.</p>
-        </div>
-
-        <div class="flex gap-3 mb-10 flex-wrap fade-in stagger-2">
-          <button class="gallery-filter active px-4 py-2 border border-dark text-dark text-xs uppercase tracking-wider font-semibold transition" data-filter="all" onclick="filterGallery('all')">All</button>
-          <button class="gallery-filter px-4 py-2 border border-dark/20 text-dark/50 text-xs uppercase tracking-wider font-semibold hover:border-dark/50 transition" data-filter="portrait" onclick="filterGallery('portrait')">Portraits</button>
-          <button class="gallery-filter px-4 py-2 border border-dark/20 text-dark/50 text-xs uppercase tracking-wider font-semibold hover:border-dark/50 transition" data-filter="editorial" onclick="filterGallery('editorial')">Editorial</button>
-          <button class="gallery-filter px-4 py-2 border border-dark/20 text-dark/50 text-xs uppercase tracking-wider font-semibold hover:border-dark/50 transition" data-filter="concept" onclick="filterGallery('concept')">Concept</button>
-        </div>
-
-        <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 fade-in stagger-3">
-          <div class="gallery-item bg-dark/5 aspect-[3/4] rounded-sm overflow-hidden cursor-pointer group relative" data-category="portrait" onclick="openLightbox('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&amp;h=750&amp;fit=crop')">
-            <div class="absolute inset-0 bg-gradient-to-b from-cream/20 to-dark/10 group-hover:opacity-70 transition-opacity"></div>
-            <div class="absolute inset-0 flex items-center justify-center"><span class="text-5xl group-hover:scale-110 transition-transform">🎤</span></div>
-            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-              <p class="text-light text-xs font-semibold uppercase tracking-wider">Celebrity Study I</p>
-            </div>
-          </div>
-
-          <div class="gallery-item bg-cream/40 aspect-[3/4] rounded-sm overflow-hidden cursor-pointer group relative" data-category="portrait" onclick="openLightbox('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&amp;h=750&amp;fit=crop')">
-            <div class="absolute inset-0 bg-gradient-to-br from-dark/5 to-cream/30 group-hover:opacity-70 transition-opacity"></div>
-            <div class="absolute inset-0 flex items-center justify-center"><span class="text-5xl group-hover:scale-110 transition-transform">🎬</span></div>
-            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-              <p class="text-light text-xs font-semibold uppercase tracking-wider">Portrait Commission</p>
-            </div>
-          </div>
-
-          <div class="gallery-item bg-dark/8 aspect-[3/4] rounded-sm overflow-hidden cursor-pointer group relative" data-category="concept" onclick="openLightbox('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&amp;h=750&amp;fit=crop')">
-            <div class="absolute inset-0 bg-gradient-to-t from-dark/15 to-transparent group-hover:opacity-70 transition-opacity"></div>
-            <div class="absolute inset-0 flex items-center justify-center"><span class="text-5xl group-hover:scale-110 transition-transform">🌟</span></div>
-            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-              <p class="text-light text-xs font-semibold uppercase tracking-wider">Star Series</p>
-            </div>
-          </div>
-
-          <div class="gallery-item bg-cream/30 aspect-[3/4] rounded-sm overflow-hidden cursor-pointer group relative" data-category="concept" onclick="openLightbox('https://images.unsplash.com/photo-1502716991646-c1400ca199e3?w=600&amp;h=750&amp;fit=crop')">
-            <div class="absolute inset-0 group-hover:opacity-70 transition-opacity"></div>
-            <div class="absolute inset-0 flex items-center justify-center"><span class="text-5xl group-hover:scale-110 transition-transform">🎭</span></div>
-            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-              <p class="text-light text-xs font-semibold uppercase tracking-wider">Character Design</p>
-            </div>
-          </div>
-
-          <div class="gallery-item bg-dark/6 aspect-[3/4] rounded-sm overflow-hidden cursor-pointer group relative" data-category="editorial" onclick="openLightbox('https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&amp;h=750&amp;fit=crop')">
-            <div class="absolute inset-0 group-hover:opacity-70 transition-opacity"></div>
-            <div class="absolute inset-0 flex items-center justify-center"><span class="text-5xl group-hover:scale-110 transition-transform">✨</span></div>
-            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-              <p class="text-light text-xs font-semibold uppercase tracking-wider">Editorial Piece</p>
-            </div>
-          </div>
-
-          <div class="gallery-item bg-cream/50 aspect-[3/4] rounded-sm overflow-hidden cursor-pointer group relative" data-category="editorial" onclick="openLightbox('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&amp;h=750&amp;fit=crop')">
-            <div class="absolute inset-0 group-hover:opacity-70 transition-opacity"></div>
-            <div class="absolute inset-0 flex items-center justify-center"><span class="text-5xl group-hover:scale-110 transition-transform">💫</span></div>
-            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-              <p class="text-light text-xs font-semibold uppercase tracking-wider">Fan Art</p>
-            </div>
-          </div>
-        </div>
+       <div class="border border-dark/10 p-8 hover:border-dark/30 transition">
+        <p class="text-xs uppercase tracking-[0.2em] text-dark/50 font-semibold">Editorial</p>
+        <h3 class="font-display text-3xl font-bold mt-2 mb-1">$250+</h3>
+        <p class="text-xs text-dark/40 mb-6">Complex scene / multi-char</p>
+        <ul class="space-y-2 text-sm text-dark/60">
+         <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>Up to 3 characters</span></li>
+         <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>Background included</span></li>
+         <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>10-day delivery</span></li>
+         <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>5 revisions</span></li>
+         <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>Print-ready resolution</span></li>
+        </ul>
+       </div>
       </div>
-
-      <!-- LIGHTBOX -->
-      <div id="lightbox" class="hidden fixed inset-0 bg-dark/90 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="closeLightbox(event)">
-        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-light hover:text-light/70 transition" style="z-index: 51;">
-          <i data-lucide="x" style="width:32px;height:32px;"></i>
-        </button>
-        <img id="lightbox-img" src="" alt="Fullscreen view" class="max-w-full max-h-[90vh] object-contain" onclick="event.stopPropagation()">
+     </div><!-- How It Works -->
+     <div class="border border-dark/10 p-8 mb-12 fade-in stagger-2">
+      <h3 class="font-display text-2xl font-bold mb-6">How It Works</h3>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-sm">
+       <div>
+        <span class="font-display text-3xl font-bold text-dark/20">01</span>
+        <p class="mt-3 text-dark/60">Send a request with your references and idea.</p>
+       </div>
+       <div>
+        <span class="font-display text-3xl font-bold text-dark/20">02</span>
+        <p class="mt-3 text-dark/60">Receive a quote and timeline confirmation.</p>
+       </div>
+       <div>
+        <span class="font-display text-3xl font-bold text-dark/20">03</span>
+        <p class="mt-3 text-dark/60">Approve the rough sketch before rendering.</p>
+       </div>
+       <div>
+        <span class="font-display text-3xl font-bold text-dark/20">04</span>
+        <p class="mt-3 text-dark/60">Final piece delivered in high resolution.</p>
+       </div>
       </div>
-
-      <!-- COMMISSIONS -->
-      <div id="page-commissions" class="page flex-col px-6 md:px-12 py-12">
-        <div class="fade-in stagger-1">
-          <h2 class="font-display text-4xl md:text-5xl font-bold mb-2">Commissions</h2>
-          <p class="text-dark/50 mb-6">Pricing, process &amp; FAQs</p>
-          <div class="inline-block mb-12">
-            <span id="comm-status" class="text-xs font-semibold uppercase tracking-[0.2em] px-4 py-1.5 border border-dark bg-dark text-light">OPEN</span>
-          </div>
-        </div>
-
-        <div class="mb-16">
-          <h3 class="font-display text-2xl font-bold mb-6 fade-in stagger-2">Pricing</h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-in stagger-3">
-            <div class="border border-dark/10 p-8 hover:border-dark/30 transition">
-              <p class="text-xs uppercase tracking-[0.2em] text-dark/50 font-semibold">Sketch</p>
-              <h3 class="font-display text-3xl font-bold mt-2 mb-1">$50</h3>
-              <p class="text-xs text-dark/40 mb-6">Black &amp; white linework</p>
-              <ul class="space-y-2 text-sm text-dark/60">
-                <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>Single character</span></li>
-                <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>Clean lineart</span></li>
-                <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>3-day delivery</span></li>
-                <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>1 revision</span></li>
-              </ul>
-            </div>
-
-            <div class="border border-dark/10 p-8 hover:border-dark/30 transition">
-              <p class="text-xs uppercase tracking-[0.2em] text-dark/50 font-semibold">Portrait</p>
-              <h3 class="font-display text-3xl font-bold mt-2 mb-1">$120</h3>
-              <p class="text-xs text-dark/40 mb-6">Full grayscale rendering</p>
-              <ul class="space-y-2 text-sm text-dark/60">
-                <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>Single character + detail</span></li>
-                <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>Full grayscale shading</span></li>
-                <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>5-day delivery</span></li>
-                <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>3 revisions</span></li>
-                <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>Celebrity style available</span></li>
-              </ul>
-            </div>
-
-            <div class="border border-dark/10 p-8 hover:border-dark/30 transition">
-              <p class="text-xs uppercase tracking-[0.2em] text-dark/50 font-semibold">Editorial</p>
-              <h3 class="font-display text-3xl font-bold mt-2 mb-1">$250+</h3>
-              <p class="text-xs text-dark/40 mb-6">Complex scene / multi-char</p>
-              <ul class="space-y-2 text-sm text-dark/60">
-                <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>Up to 3 characters</span></li>
-                <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>Background included</span></li>
-                <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>10-day delivery</span></li>
-                <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>5 revisions</span></li>
-                <li class="flex items-start gap-2"><span class="mt-0.5">✦</span><span>Print-ready resolution</span></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div class="border border-dark/10 p-8 mb-12 fade-in stagger-2">
-          <h3 class="font-display text-2xl font-bold mb-6">How It Works</h3>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-sm">
-            <div>
-              <span class="font-display text-3xl font-bold text-dark/20">01</span>
-              <p class="mt-3 text-dark/60">Send a request with your references and idea.</p>
-            </div>
-            <div>
-              <span class="font-display text-3xl font-bold text-dark/20">02</span>
-              <p class="mt-3 text-dark/60">Receive a quote and timeline confirmation.</p>
-            </div>
-            <div>
-              <span class="font-display text-3xl font-bold text-dark/20">03</span>
-              <p class="mt-3 text-dark/60">Approve the rough sketch before rendering.</p>
-            </div>
-            <div>
-              <span class="font-display text-3xl font-bold text-dark/20">04</span>
-              <p class="mt-3 text-dark/60">Final piece delivered in high resolution.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid md:grid-cols-2 gap-6 mb-12 fade-in stagger-3">
-          <div class="bg-cream/30 p-6 rounded-sm">
-            <h3 class="font-display text-lg font-bold mb-3 flex items-center gap-2">
-              <i data-lucide="check-circle" style="width:18px;height:18px;"></i>
-              Will Draw
-            </h3>
-            <p id="will-draw-text" class="text-sm text-dark/70 leading-relaxed whitespace-pre-line">OCs, Fanart, Portraits, Celebrities, Couples, Mild gore, Animals</p>
-          </div>
-
-          <div class="bg-dark/5 p-6 rounded-sm">
-            <h3 class="font-display text-lg font-bold mb-3 flex items-center gap-2">
-              <i data-lucide="x-circle" style="width:18px;height:18px;"></i>
-              Won't Draw
-            </h3>
-            <p id="wont-draw-text" class="text-sm text-dark/70 leading-relaxed whitespace-pre-line">NSFW, Hate art, Heavy mecha, Furry (complex)</p>
-          </div>
-        </div>
-
-        <div class="border border-dark/10 p-8 mb-12 fade-in stagger-4">
-          <button onclick="toggleTOS()" class="w-full flex items-center justify-between hover:opacity-70 transition">
-            <h3 class="font-display text-2xl font-bold">Terms of Service</h3>
-            <i id="tos-icon" data-lucide="chevron-down" style="width:24px;height:24px;transition:transform 0.3s;"></i>
-          </button>
-
-          <div id="tos-content" class="hidden mt-6 text-sm text-dark/60 leading-relaxed max-w-2xl space-y-2 whitespace-pre-line">
-            Payment is required upfront via PayPal or other agreed method. I reserve the right to decline any commission. Refunds are available before the sketch phase only. Please allow 2–4 weeks for completion. I may post the finished work on my social media unless otherwise agreed. Commercial use requires a separate agreement and additional fee.
-          </div>
-        </div>
-
-        <div class="fade-in stagger-4">
-          <a id="order-btn" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-10 py-4 bg-dark text-light text-sm font-semibold uppercase tracking-wider transition-colors duration-300 hover:bg-dark/80">
-            <i data-lucide="external-link" style="width:16px;height:16px;"></i>
-            Start Commission
-          </a>
-          <p class="text-xs text-dark/40 mt-2">Opens commission form in a new tab</p>
-        </div>
+     </div><!-- Will / Won't draw -->
+     <div class="grid md:grid-cols-2 gap-6 mb-12 fade-in stagger-3">
+      <div class="bg-cream/30 p-6 rounded-sm">
+       <h3 class="font-display text-lg font-bold mb-3 flex items-center gap-2"><i data-lucide="check-circle" style="width:18px;height:18px;"></i> Will Draw</h3>
+       <p id="will-draw-text" class="text-sm text-dark/70 leading-relaxed whitespace-pre-line">OCs, Fanart, Portraits, Celebrities, Couples, Mild gore, Animals</p>
       </div>
-
-      <!-- TESTIMONIALS -->
-      <div id="page-testimonials" class="page flex-col px-6 md:px-12 py-12">
-        <div class="fade-in stagger-1">
-          <h2 class="font-display text-4xl md:text-5xl font-bold mb-2">Testimonials</h2>
-          <p class="text-dark/50 mb-10">What clients are saying</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 fade-in stagger-2">
-          <div class="border border-dark/10 p-6 hover:border-dark/30 transition">
-            <div class="flex gap-1 mb-3"><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span></div>
-            <p class="text-dark/70 text-sm leading-relaxed italic">"Koshdi captured exactly what I envisioned — the energy, the presence. Unbelievably talented."</p>
-            <p class="text-dark/40 text-xs font-semibold tracking-wider mt-4">— Alex M., Actor</p>
-          </div>
-
-          <div class="border border-dark/10 p-6 hover:border-dark/30 transition">
-            <div class="flex gap-1 mb-3"><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span></div>
-            <p class="text-dark/70 text-sm leading-relaxed italic">"Fast turnaround, incredible detail, and responsive to feedback. Highly recommend for any artist."</p>
-            <p class="text-dark/40 text-xs font-semibold tracking-wider mt-4">— Jordan T., Musician</p>
-          </div>
-
-          <div class="border border-dark/10 p-6 hover:border-dark/30 transition">
-            <div class="flex gap-1 mb-3"><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span></div>
-            <p class="text-dark/70 text-sm leading-relaxed italic">"The level of professionalism here is unmatched. Worth every penny. Can't wait to commission again."</p>
-            <p class="text-dark/40 text-xs font-semibold tracking-wider mt-4">— Casey R., Producer</p>
-          </div>
-
-          <div class="border border-dark/10 p-6 hover:border-dark/30 transition">
-            <div class="flex gap-1 mb-3"><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span></div>
-            <p class="text-dark/70 text-sm leading-relaxed italic">"Absolutely exceeded my expectations. The portrait is stunning — every detail is perfect."</p>
-            <p class="text-dark/40 text-xs font-semibold tracking-wider mt-4">— Morgan L., Content Creator</p>
-          </div>
-        </div>
+      <div class="bg-dark/5 p-6 rounded-sm">
+       <h3 class="font-display text-lg font-bold mb-3 flex items-center gap-2"><i data-lucide="x-circle" style="width:18px;height:18px;"></i> Won't Draw</h3>
+       <p id="wont-draw-text" class="text-sm text-dark/70 leading-relaxed whitespace-pre-line">NSFW, Hate art, Heavy mecha, Furry (complex)</p>
       </div>
-
-      <!-- PROJECTS -->
-      <div id="page-projects" class="page flex-col px-6 md:px-12 py-12">
-        <div class="fade-in stagger-1">
-          <h2 class="font-display text-4xl md:text-5xl font-bold mb-2">Projects</h2>
-          <p class="text-dark/50 mb-10">Personal and collaborative work</p>
-        </div>
-
-        <div class="space-y-8">
-          <div class="border border-dark/10 p-8 hover:border-dark/30 transition fade-in stagger-2">
-            <div class="flex items-start justify-between">
-              <div>
-                <p class="text-xs uppercase tracking-[0.2em] text-dark/40 font-semibold">Ongoing — 2024</p>
-                <h3 class="font-display text-2xl font-bold mt-3 mb-3">✦ ICONS Series</h3>
-                <p class="text-sm text-dark/60 leading-relaxed max-w-3xl">A long-form portrait series reimagining cultural icons — musicians, actors, and public figures — as stark black-and-white ink studies. Each piece strips away the glamour to reveal raw human expression.</p>
-              </div>
-              <span class="text-3xl shrink-0">✦</span>
-            </div>
-            <div class="flex gap-2 mt-6 flex-wrap">
-              <span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">12 Pieces</span>
-              <span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">Ink</span>
-              <span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">Portrait</span>
-            </div>
-            <a id="project-1-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 mt-6 text-xs uppercase tracking-[0.2em] text-dark font-semibold hover:text-dark/60 transition">
-              <i data-lucide="external-link" style="width:14px;height:14px;"></i>
-              View Project
-            </a>
-          </div>
-
-          <div class="border border-dark/10 p-8 hover:border-dark/30 transition fade-in stagger-3">
-            <div class="flex items-start justify-between">
-              <div>
-                <p class="text-xs uppercase tracking-[0.2em] text-dark/40 font-semibold">Completed — 2023</p>
-                <h3 class="font-display text-2xl font-bold mt-3 mb-3">Paparazzi Zine</h3>
-                <p class="text-sm text-dark/60 leading-relaxed max-w-3xl">A self-published 32-page zine exploring the relationship between celebrity and surveillance. Hand-drawn illustrations paired with found text from tabloid headlines.</p>
-              </div>
-              <span class="text-3xl shrink-0">✦</span>
-            </div>
-            <div class="flex gap-2 mt-6 flex-wrap">
-              <span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">Zine</span>
-              <span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">32 Pages</span>
-              <span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">Mixed Media</span>
-            </div>
-            <a id="project-2-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 mt-6 text-xs uppercase tracking-[0.2em] text-dark font-semibold hover:text-dark/60 transition">
-              <i data-lucide="external-link" style="width:14px;height:14px;"></i>
-              View Project
-            </a>
-          </div>
-
-          <div class="border border-dark/10 p-8 hover:border-dark/30 transition fade-in stagger-4">
-            <div class="flex items-start justify-between">
-              <div>
-                <p class="text-xs uppercase tracking-[0.2em] text-dark/40 font-semibold">Completed — 2023</p>
-                <h3 class="font-display text-2xl font-bold mt-3 mb-3">Red Carpet Ghosts</h3>
-                <p class="text-sm text-dark/60 leading-relaxed max-w-3xl">An editorial collaboration with an independent fashion magazine. Spectral, high-contrast portraits of unnamed figures in couture — celebrities rendered as silhouettes and energy.</p>
-              </div>
-              <span class="text-3xl shrink-0">✦</span>
-            </div>
-            <div class="flex gap-2 mt-6 flex-wrap">
-              <span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">Editorial</span>
-              <span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">8 Illustrations</span>
-              <span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">Collaboration</span>
-            </div>
-            <a id="project-3-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 mt-6 text-xs uppercase tracking-[0.2em] text-dark font-semibold hover:text-dark/60 transition">
-              <i data-lucide="external-link" style="width:14px;height:14px;"></i>
-              View Project
-            </a>
-          </div>
-        </div>
+     </div><!-- TOS Collapsible -->
+     <div class="border border-dark/10 p-8 mb-12 fade-in stagger-4">
+      <button onclick="toggleTOS()" class="w-full flex items-center justify-between hover:opacity-70 transition"> <h3 class="font-display text-2xl font-bold">Terms of Service</h3><i id="tos-icon" data-lucide="chevron-down" style="width:24px;height:24px;transition:transform 0.3s;"></i> </button>
+      <div id="tos-content" class="hidden mt-6 text-sm text-dark/60 leading-relaxed max-w-2xl space-y-2 whitespace-pre-line">
+       Payment is required upfront via PayPal or other agreed method. I reserve the right to decline any commission. Refunds are available before the sketch phase only. Please allow 2–4 weeks for completion. I may post the finished work on my social media unless otherwise agreed. Commercial use requires a separate agreement and additional fee.
       </div>
-
-      <!-- ABOUT -->
-      <div id="page-about" class="page flex-col px-6 md:px-12 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
-          <div>
-            <div class="fade-in stagger-1">
-              <h2 class="font-display text-4xl md:text-5xl font-bold mb-2">About</h2>
-              <p class="text-dark/50 text-sm">she / her — Digital Artist &amp; Portrait Specialist</p>
-            </div>
-
-            <div class="text-dark/60 leading-relaxed space-y-4 text-sm mt-6 fade-in stagger-2">
-              <p>Hi! I'm KOSHDI — a digital artist specializing in expressive black-and-white illustration, character studies, and celebrity portraits. My work blends clean linework with atmospheric rendering, capturing personality and emotion in every piece.</p>
-              <p>I've been drawing for over 3 years in digital, with a passion for portrait work and character design. I'm constantly inspired by cinema, music, and pop culture. Every commission is an opportunity to grow and refine my craft.</p>
-            </div>
-
-            <div class="mt-10 fade-in stagger-3">
-              <h3 class="text-xs uppercase tracking-[0.2em] text-dark/40 font-semibold mb-4">Experience</h3>
-              <div class="space-y-3 text-sm">
-                <div class="flex justify-between border-b border-dark/10 pb-2">
-                  <span class="text-dark/70">Freelance Illustrator</span>
-                  <span class="text-dark/40 text-xs">2020 — Present</span>
-                </div>
-                <div class="flex justify-between border-b border-dark/10 pb-2">
-                  <span class="text-dark/70">Celebrity Portrait Series</span>
-                  <span class="text-dark/40 text-xs">2022 — Present</span>
-                </div>
-                <div class="flex justify-between border-b border-dark/10 pb-2">
-                  <span class="text-dark/70">Editorial Collaborations</span>
-                  <span class="text-dark/40 text-xs">2023</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-10 pt-10 border-t border-dark/10 fade-in stagger-4">
-              <h3 class="text-xs uppercase tracking-[0.2em] text-dark/40 font-semibold mb-4">Connect</h3>
-              <div class="flex gap-3">
-                <a href="#" target="_blank" rel="noopener noreferrer" class="w-10 h-10 border border-dark/20 flex items-center justify-center hover:bg-dark hover:text-light transition rounded-sm">
-                  <i data-lucide="twitter" style="width:16px;height:16px;"></i>
-                </a>
-                <a href="#" target="_blank" rel="noopener noreferrer" class="w-10 h-10 border border-dark/20 flex items-center justify-center hover:bg-dark hover:text-light transition rounded-sm">
-                  <i data-lucide="instagram" style="width:16px;height:16px;"></i>
-                </a>
-                <a href="#" target="_blank" rel="noopener noreferrer" class="w-10 h-10 border border-dark/20 flex items-center justify-center hover:bg-dark hover:text-light transition rounded-sm">
-                  <i data-lucide="mail" style="width:16px;height:16px;"></i>
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div class="fade-in stagger-2">
-            <div class="flex items-center gap-6 mb-8">
-              <div class="w-24 h-24 rounded-full bg-cream/60 flex items-center justify-center shrink-0 border-2 border-dark/10">
-                <span class="text-4xl">🎨</span>
-              </div>
-              <div>
-                <h3 class="font-display text-2xl font-bold">KOSHDI</h3>
-                <p class="text-dark/50 text-sm">2D Artist · Illustrator</p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-3 gap-3 fade-in stagger-3">
-              <div class="border border-dark/10 p-4 text-center hover:border-dark/30 transition">
-                <p class="font-display text-3xl font-bold">200+</p>
-                <p class="text-dark/40 text-xs uppercase tracking-wider mt-2 font-semibold">Works</p>
-              </div>
-              <div class="border border-dark/10 p-4 text-center hover:border-dark/30 transition">
-                <p class="font-display text-3xl font-bold">80+</p>
-                <p class="text-dark/40 text-xs uppercase tracking-wider mt-2 font-semibold">Clients</p>
-              </div>
-              <div class="border border-dark/10 p-4 text-center hover:border-dark/30 transition">
-                <p class="font-display text-3xl font-bold">3yr</p>
-                <p class="text-dark/40 text-xs uppercase tracking-wider mt-2 font-semibold">Active</p>
-              </div>
-            </div>
-          </div>
-        </div>
+     </div><!-- Order button -->
+     <div class="fade-in stagger-4"><a id="order-btn" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-10 py-4 bg-dark text-light text-sm font-semibold uppercase tracking-wider hover:bg-dark/80 transition"> <i data-lucide="external-link" style="width:16px;height:16px;"></i> Start Commission </a>
+      <p class="text-xs text-dark/40 mt-2">Opens commission form in a new tab</p>
+     </div>
+    </div><!-- TESTIMONIALS PAGE -->
+    <div id="page-testimonials" class="page flex-col px-6 md:px-12 py-12">
+     <div class="fade-in stagger-1">
+      <h2 class="font-display text-4xl md:text-5xl font-bold mb-2">Testimonials</h2>
+      <p class="text-dark/50 mb-10">What clients are saying</p>
+     </div>
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 fade-in stagger-2">
+      <div class="border border-dark/10 p-6 hover:border-dark/30 transition">
+       <div class="flex gap-1 mb-3"><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span>
+       </div>
+       <p class="text-dark/70 text-sm leading-relaxed italic">"Koshdi captured exactly what I envisioned — the energy, the presence. Unbelievably talented."</p>
+       <p class="text-dark/40 text-xs font-semibold tracking-wider mt-4">— Alex M., Actor</p>
       </div>
-
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="w-full border-t border-dark/10 px-6 md:px-12 py-5 flex items-center justify-between text-xs text-dark/40 shrink-0">
-      <span>© 2026 KOSHDI</span>
-      <span class="uppercase tracking-wider">Art &amp; Soul</span>
-    </footer>
-
+      <div class="border border-dark/10 p-6 hover:border-dark/30 transition">
+       <div class="flex gap-1 mb-3"><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span>
+       </div>
+       <p class="text-dark/70 text-sm leading-relaxed italic">"Fast turnaround, incredible detail, and responsive to feedback. Highly recommend for any artist."</p>
+       <p class="text-dark/40 text-xs font-semibold tracking-wider mt-4">— Jordan T., Musician</p>
+      </div>
+      <div class="border border-dark/10 p-6 hover:border-dark/30 transition">
+       <div class="flex gap-1 mb-3"><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span>
+       </div>
+       <p class="text-dark/70 text-sm leading-relaxed italic">"The level of professionalism here is unmatched. Worth every penny. Can't wait to commission again."</p>
+       <p class="text-dark/40 text-xs font-semibold tracking-wider mt-4">— Casey R., Producer</p>
+      </div>
+      <div class="border border-dark/10 p-6 hover:border-dark/30 transition">
+       <div class="flex gap-1 mb-3"><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span><span class="text-cream">✦</span>
+       </div>
+       <p class="text-dark/70 text-sm leading-relaxed italic">"Absolutely exceeded my expectations. The portrait is stunning — every detail is perfect."</p>
+       <p class="text-dark/40 text-xs font-semibold tracking-wider mt-4">— Morgan L., Content Creator</p>
+      </div>
+     </div>
+    </div><!-- PROJECTS PAGE -->
+    <div id="page-projects" class="page flex-col px-6 md:px-12 py-12">
+     <div class="fade-in stagger-1">
+      <h2 class="font-display text-4xl md:text-5xl font-bold mb-2">Projects</h2>
+      <p class="text-dark/50 mb-10">Personal and collaborative work</p>
+     </div>
+     <div class="space-y-8">
+      <div class="border border-dark/10 p-8 hover:border-dark/30 transition fade-in stagger-2">
+       <div class="flex items-start justify-between">
+        <div>
+         <p class="text-xs uppercase tracking-[0.2em] text-dark/40 font-semibold">Ongoing — 2024</p>
+         <h3 class="font-display text-2xl font-bold mt-3 mb-3">✦ ICONS Series</h3>
+         <p class="text-sm text-dark/60 leading-relaxed max-w-3xl">A long-form portrait series reimagining cultural icons — musicians, actors, and public figures — as stark black-and-white ink studies. Each piece strips away the glamour to reveal raw human expression.</p>
+        </div><span class="text-3xl shrink-0">✦</span>
+       </div>
+       <div class="flex gap-2 mt-6 flex-wrap"><span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">12 Pieces</span> <span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">Ink</span> <span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">Portrait</span>
+       </div><a id="project-1-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 mt-6 text-xs uppercase tracking-[0.2em] text-dark font-semibold hover:text-dark/60 transition"><i data-lucide="external-link" style="width:14px;height:14px;"></i> View Project</a>
+      </div>
+      <div class="border border-dark/10 p-8 hover:border-dark/30 transition fade-in stagger-3">
+       <div class="flex items-start justify-between">
+        <div>
+         <p class="text-xs uppercase tracking-[0.2em] text-dark/40 font-semibold">Completed — 2023</p>
+         <h3 class="font-display text-2xl font-bold mt-3 mb-3">Paparazzi Zine</h3>
+         <p class="text-sm text-dark/60 leading-relaxed max-w-3xl">A self-published 32-page zine exploring the relationship between celebrity and surveillance. Hand-drawn illustrations paired with found text from tabloid headlines.</p>
+        </div><span class="text-3xl shrink-0">✦</span>
+       </div>
+       <div class="flex gap-2 mt-6 flex-wrap"><span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">Zine</span> <span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">32 Pages</span> <span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">Mixed Media</span>
+       </div><a id="project-2-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 mt-6 text-xs uppercase tracking-[0.2em] text-dark font-semibold hover:text-dark/60 transition"><i data-lucide="external-link" style="width:14px;height:14px;"></i> View Project</a>
+      </div>
+      <div class="border border-dark/10 p-8 hover:border-dark/30 transition fade-in stagger-4">
+       <div class="flex items-start justify-between">
+        <div>
+         <p class="text-xs uppercase tracking-[0.2em] text-dark/40 font-semibold">Completed — 2023</p>
+         <h3 class="font-display text-2xl font-bold mt-3 mb-3">Red Carpet Ghosts</h3>
+         <p class="text-sm text-dark/60 leading-relaxed max-w-3xl">An editorial collaboration with an independent fashion magazine. Spectral, high-contrast portraits of unnamed figures in couture — celebrities rendered as silhouettes and energy.</p>
+        </div><span class="text-3xl shrink-0">✦</span>
+       </div>
+       <div class="flex gap-2 mt-6 flex-wrap"><span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">Editorial</span> <span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">8 Illustrations</span> <span class="text-xs uppercase tracking-[0.2em] border border-dark/10 px-3 py-1 text-dark/50 font-semibold">Collaboration</span>
+       </div><a id="project-3-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 mt-6 text-xs uppercase tracking-[0.2em] text-dark font-semibold hover:text-dark/60 transition"><i data-lucide="external-link" style="width:14px;height:14px;"></i> View Project</a>
+      </div>
+     </div>
+    </div><!-- ABOUT PAGE -->
+    <div id="page-about" class="page flex-col px-6 md:px-12 py-12">
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16"><!-- Left Column -->
+      <div>
+       <div class="fade-in stagger-1">
+        <h2 class="font-display text-4xl md:text-5xl font-bold mb-2">About</h2>
+        <p class="text-dark/50 text-sm">she / her — Digital Artist &amp; Portrait Specialist</p>
+       </div>
+       <div class="text-dark/60 leading-relaxed space-y-4 text-sm mt-6 fade-in stagger-2">
+        <p>Hi! I'm KOSHDI — a digital artist specializing in expressive black-and-white illustration, character studies, and celebrity portraits. My work blends clean linework with atmospheric rendering, capturing personality and emotion in every piece.</p>
+        <p>I've been drawing for over 3 years in digital, with a passion for portrait work and character design. I'm constantly inspired by cinema, music, and pop culture. Every commission is an opportunity to grow and refine my craft.</p>
+       </div><!-- Experience Section -->
+       <div class="mt-10 fade-in stagger-3">
+        <h3 class="text-xs uppercase tracking-[0.2em] text-dark/40 font-semibold mb-4">Experience</h3>
+        <div class="space-y-3 text-sm">
+         <div class="flex justify-between border-b border-dark/10 pb-2"><span class="text-dark/70">Freelance Illustrator</span> <span class="text-dark/40 text-xs">2020 — Present</span>
+         </div>
+         <div class="flex justify-between border-b border-dark/10 pb-2"><span class="text-dark/70">Celebrity Portrait Series</span> <span class="text-dark/40 text-xs">2022 — Present</span>
+         </div>
+         <div class="flex justify-between border-b border-dark/10 pb-2"><span class="text-dark/70">Editorial Collaborations</span> <span class="text-dark/40 text-xs">2023</span>
+         </div>
+        </div>
+       </div><!-- Contact Section -->
+       <div class="mt-10 pt-10 border-t border-dark/10 fade-in stagger-4">
+        <h3 class="text-xs uppercase tracking-[0.2em] text-dark/40 font-semibold mb-4">Connect</h3>
+        <div class="flex gap-3"><a href="#" target="_blank" rel="noopener noreferrer" class="w-10 h-10 border border-dark/20 flex items-center justify-center hover:bg-dark hover:text-light transition rounded-sm"><i data-lucide="twitter" style="width:16px;height:16px;"></i></a> <a href="#" target="_blank" rel="noopener noreferrer" class="w-10 h-10 border border-dark/20 flex items-center justify-center hover:bg-dark hover:text-light transition rounded-sm"><i data-lucide="instagram" style="width:16px;height:16px;"></i></a> <a href="#" target="_blank" rel="noopener noreferrer" class="w-10 h-10 border border-dark/20 flex items-center justify-center hover:bg-dark hover:text-light transition rounded-sm"><i data-lucide="mail" style="width:16px;height:16px;"></i></a>
+        </div>
+       </div>
+      </div><!-- Right Column -->
+      <div class="fade-in stagger-2">
+       <div class="flex items-center gap-6 mb-8">
+        <div class="w-24 h-24 rounded-full bg-cream/60 flex items-center justify-center shrink-0 border-2 border-dark/10"><span class="text-4xl">🎨</span>
+        </div>
+        <div>
+         <h3 class="font-display text-2xl font-bold">KOSHDI</h3>
+         <p class="text-dark/50 text-sm">2D Artist · Illustrator</p>
+        </div>
+       </div><!-- Stats Grid -->
+       <div class="grid grid-cols-3 gap-3 fade-in stagger-3">
+        <div class="border border-dark/10 p-4 text-center hover:border-dark/30 transition">
+         <p class="font-display text-3xl font-bold">200+</p>
+         <p class="text-dark/40 text-xs uppercase tracking-wider mt-2 font-semibold">Works</p>
+        </div>
+        <div class="border border-dark/10 p-4 text-center hover:border-dark/30 transition">
+         <p class="font-display text-3xl font-bold">80+</p>
+         <p class="text-dark/40 text-xs uppercase tracking-wider mt-2 font-semibold">Clients</p>
+        </div>
+        <div class="border border-dark/10 p-4 text-center hover:border-dark/30 transition">
+         <p class="font-display text-3xl font-bold">3yr</p>
+         <p class="text-dark/40 text-xs uppercase tracking-wider mt-2 font-semibold">Active</p>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div><!-- Footer -->
+   <footer class="w-full border-t border-dark/10 px-6 md:px-12 py-5 flex items-center justify-between text-xs text-dark/40 shrink-0"><span>© 2026 KOSHDI</span> <span class="uppercase tracking-wider">Art &amp; Soul</span>
+   </footer>
   </div>
+  <script>
+const defaultConfig = {
+  artist_tagline: 'Capturing stars in ink & pixel',
+  commission_status: 'OPEN',
+  order_link: '#',
+  project_1_link: '#',
+  project_2_link: '#',
+  project_3_link: '#',
+  will_draw: 'OCs, Fanart, Portraits, Celebrities, Couples, Mild gore, Animals',
+  wont_draw: 'NSFW, Hate art, Heavy mecha, Furry (complex)',
+  tos_text: `Payment is required upfront via PayPal or other agreed method.\nI reserve the right to decline any commission.\nRefunds are available before the sketch phase only.\nPlease allow 2–4 weeks for completion.\nI may post the finished work on my social media unless otherwise agreed.\nCommercial use requires a separate agreement and additional fee.`,
+  background_color: '#f5f5f5',
+  surface_color: '#efdecd',
+  text_color: '#1e1d21',
+  primary_action_color: '#1e1d21',
+  secondary_action_color: '#1e1d21',
+  font_family: 'Playfair Display',
+  font_size: 16
+};
 
-  <script src="script.js"></script>
-</body>
+function navigate(page, save = true) {
+  if (save) {
+    window.location.hash = page;
+  }
+
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page-' + page);
+
+  if (target) {
+    target.classList.add('active');
+  }
+
+  document.querySelectorAll('.nav-link').forEach(l => {
+    l.classList.toggle('active-link', l.dataset.page === page);
+  });
+
+  document.querySelector('.flex-1.overflow-auto').scrollTop = 0;
+  lucide.createIcons();
+}
+
+
+function initPageFromHash() {
+  let page = window.location.hash.replace('#', '') || 'home';
+  navigate(page, false);
+  document.documentElement.style.visibility = 'visible';
+}
+window.addEventListener('load', initPageFromHash);
+window.addEventListener('hashchange', initPageFromHash);
+
+
+
+function toggleTOS() {
+  const content = document.getElementById('tos-content');
+  const icon = document.getElementById('tos-icon');
+  content.classList.toggle('hidden');
+  icon.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+
+function filterGallery(category) {
+  const items = document.querySelectorAll('#gallery-grid .gallery-item');
+  const buttons = document.querySelectorAll('.gallery-filter');
+  
+  buttons.forEach(btn => btn.classList.toggle('active', btn.dataset.filter === category));
+  
+  items.forEach(item => {
+    if (category === 'all' || item.dataset.category === category) {
+      item.style.display = 'flex';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+function openLightbox(src) {
+  const lightbox = document.getElementById('lightbox');
+  const img = document.getElementById('lightbox-img');
+  img.src = src;
+  lightbox.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox(event) {
+  if (event && event.target !== document.getElementById('lightbox')) return;
+  const lightbox = document.getElementById('lightbox');
+  lightbox.classList.add('hidden');
+  document.body.style.overflow = 'auto';
+}
+
+function applyConfig(config) {
+  const c = { ...defaultConfig, ...config };
+  document.getElementById('home-tagline').textContent = c.artist_tagline;
+  document.getElementById('comm-status').textContent = c.commission_status;
+  document.getElementById('will-draw-text').textContent = c.will_draw;
+  document.getElementById('wont-draw-text').textContent = c.wont_draw;
+  document.getElementById('tos-content').textContent = c.tos_text;
+  const orderBtn = document.getElementById('order-btn');
+  orderBtn.href = c.order_link || '#';
+  document.getElementById('project-1-link').href = c.project_1_link || '#';
+  document.getElementById('project-2-link').href = c.project_2_link || '#';
+  document.getElementById('project-3-link').href = c.project_3_link || '#';
+  document.getElementById('app-wrapper').style.backgroundColor = c.background_color;
+  document.body.style.color = c.text_color;
+}
+
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => applyConfig(config),
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+      { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+      { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+      { get: () => config.primary_action_color || defaultConfig.primary_action_color, set: (v) => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); } },
+      { get: () => config.secondary_action_color || defaultConfig.secondary_action_color, set: (v) => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); } },
+    ],
+    borderables: [],
+    fontEditable: {
+      get: () => config.font_family || defaultConfig.font_family,
+      set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+    },
+    fontSizeable: {
+      get: () => config.font_size || defaultConfig.font_size,
+      set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+    }
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ['artist_tagline', config.artist_tagline || defaultConfig.artist_tagline],
+    ['commission_status', config.commission_status || defaultConfig.commission_status],
+    ['order_link', config.order_link || defaultConfig.order_link],
+    ['project_1_link', config.project_1_link || defaultConfig.project_1_link],
+    ['project_2_link', config.project_2_link || defaultConfig.project_2_link],
+    ['project_3_link', config.project_3_link || defaultConfig.project_3_link],
+    ['will_draw', config.will_draw || defaultConfig.will_draw],
+    ['wont_draw', config.wont_draw || defaultConfig.wont_draw],
+    ['tos_text', config.tos_text || defaultConfig.tos_text],
+  ])
+});
+
+window.addEventListener('load', () => {
+  const page = window.location.hash.replace('#', '') || 'home';
+  navigate(page);
+});
+
+window.addEventListener('hashchange', () => {
+  const page = window.location.hash.replace('#', '') || 'home';
+  navigate(page);
+});
+
+lucide.createIcons();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f3703afa21c2479',t:'MTc3NzM4OTI0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
