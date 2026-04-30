@@ -17,6 +17,11 @@ body.no-scroll {
   font-family: 'Playfair Display', serif;
 }
 
+#page-home {
+  display: flex;
+  flex-direction: column;
+}
+
 .page { display: none; }
 .page.active { display: flex; }
 
