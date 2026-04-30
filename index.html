@@ -61,7 +61,7 @@ tailwind.config = {
      KOSHDI
     </div>
     <div class="nav-container flex items-center gap-6 md:gap-8 text-sm font-medium tracking-wide uppercase">
-     <span class="nav-link active-link" data-page="home" onclick="navigate('home')">Home</span> <span class="nav-link" data-page="gallery" onclick="navigate('gallery')">Gallery</span> <span class="nav-link" data-page="commissions" onclick="navigate('commissions')">Commissions</span> <span class="nav-link" data-page="testimonials" onclick="navigate('testimonials')">Testimonials</span> <span class="nav-link" data-page="projects" onclick="navigate('projects')">Projects</span> <span class="nav-link" data-page="about" onclick="navigate('about')">About</span>
+     <span class="nav-link" data-page="home" onclick="navigate('home')">Home</span> <span class="nav-link" data-page="gallery" onclick="navigate('gallery')">Gallery</span> <span class="nav-link" data-page="commissions" onclick="navigate('commissions')">Commissions</span> <span class="nav-link" data-page="testimonials" onclick="navigate('testimonials')">Testimonials</span> <span class="nav-link" data-page="projects" onclick="navigate('projects')">Projects</span> <span class="nav-link" data-page="about" onclick="navigate('about')">About</span>
     </div>
    </nav><!-- Pages Container -->
    <div class="flex-1 overflow-auto w-full">
@@ -500,15 +500,6 @@ window.elementSdk.init({
   ])
 });
 
-window.addEventListener('load', () => {
-  const page = window.location.hash.replace('#', '') || 'home';
-  navigate(page);
-});
-
-window.addEventListener('hashchange', () => {
-  const page = window.location.hash.replace('#', '') || 'home';
-  navigate(page);
-});
 
 lucide.createIcons();
   </script>
