@@ -1,4 +1,5 @@
 html {
+  height: 100%;
   scrollbar-gutter: stable;
 }
 
@@ -7,6 +8,7 @@ body {
   margin: 0;
   font-family: 'DM Sans', sans-serif;
   box-sizing: border-box;
+  overflow-y: scroll;
 }
 
 body.no-scroll {
@@ -17,8 +19,13 @@ body.no-scroll {
   font-family: 'Playfair Display', serif;
 }
 
-.page { display: none; }
-.page.active { display: flex; }
+.page {
+  display: none;
+}
+
+.page.active {
+  display: flex;
+}
 
 .nav-link {
   position: relative;
@@ -67,7 +74,7 @@ body.no-scroll {
 
 .gallery-item:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(30,29,33,0.15);
+  box-shadow: 0 20px 40px rgba(30, 29, 33, 0.15);
 }
 
 .marquee {
@@ -89,6 +96,10 @@ body.no-scroll {
   width: 6px;
 }
 
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 ::-webkit-scrollbar-thumb {
   background: #1e1d21;
   border-radius: 3px;
@@ -96,6 +107,7 @@ body.no-scroll {
 
 .nav-container {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 
@@ -107,10 +119,6 @@ body.no-scroll {
   border-color: #1e1d21;
   color: #1e1d21;
 }
-button:active {
-  transform: translateY(0);
-  box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-}
 
 button {
   transition: all 0.3s ease;
@@ -121,11 +129,13 @@ button:hover {
   transform: translateY(-1px);
 }
 
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+
 #app-wrapper {
   display: flex;
   flex-direction: column;
-}
-
-.flex-1 {
-  flex: 1;
+  min-height: 100vh;
 }
