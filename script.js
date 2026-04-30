@@ -8,7 +8,15 @@ function navigate(page) {
   document.querySelectorAll('.nav-link').forEach(l => {
     l.classList.toggle('active-link', l.dataset.page === page);
   });
+  
+const marquee = document.getElementById('home-marquee');
 
+if (page === 'home') {
+  marquee.style.display = 'block';
+} else {
+  marquee.style.display = 'none';
+}
+  
   const container = document.querySelector('.flex-1.overflow-auto');
 
   if (page === 'home') {
@@ -21,6 +29,7 @@ function navigate(page) {
   lucide.createIcons();
   document.documentElement.style.visibility = 'visible';
 }
+
 
 window.addEventListener('load', () => {
   const page = window.location.hash.replace('#', '') || 'home';
