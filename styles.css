@@ -80,6 +80,7 @@ body.no-scroll {
 .marquee {
   overflow: hidden;
   white-space: nowrap;
+  width: 100%;
 }
 
 .marquee-inner {
@@ -91,7 +92,6 @@ body.no-scroll {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
-
 ::-webkit-scrollbar {
   width: 6px;
 }
